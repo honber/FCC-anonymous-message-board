@@ -3,7 +3,7 @@
   <head>
     <title>Welcome to HyperDev!</title>
     <meta name="description" content="A cool thing made with HyperDev">
-    <link id="favicon" rel="icon" href="https://hyperdev.com/favicon-app.ico" type="image/x-icon">
+ <!--   <link id="favicon" rel="icon" href="https://hyperdev.com/favicon-app.ico" type="image/x-icon"> -->
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -32,7 +32,7 @@
             crossorigin="anonymous"></script>
     <script>
       $(function() {
-        var currentBoard = window.location.pathname.slice(3,-1);
+        var currentBoard = window.location.pathname.slice(3);
         var url = "/api/threads/"+currentBoard;
         $('#boardTitle').text('Welcome to '+window.location.pathname)
         $.ajax({
@@ -47,6 +47,7 @@
             //
             data.forEach(function(ele) {
               console.log(ele);//can I use typeScript please?!
+              ele.replycount = ele.replies.length;
               var thread = ['<div class="thread">'];
               thread.push('<div class="main">')
               thread.push('<p class="id">id: '+ele._id+' ('+ele.created_on+')</p>');
