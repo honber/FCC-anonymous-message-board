@@ -100,7 +100,7 @@ module.exports = function (app) {
     })
   
     .put((req, res) => {
-       const boardName = req.body.board; 
+       const boardName = req.body.board || req.params.board;
        const threadId = req.body.thread_id; 
        threadModel.findOneAndUpdate({board: boardName, _id: threadId}, {$set: {reported: true}}, {new: true}, (error, response) => {
          if (error) { 
@@ -114,7 +114,7 @@ module.exports = function (app) {
     })
   
     .delete((req, res) => {
-       const boardName = req.body.board; 
+       const boardName = req.body.board || req.params.board;
        const threadId = req.body.thread_id; 
        const password = req.body.delete_password;
        threadModel.deleteOne({board: boardName, _id: threadId, delete_password: password}, (error, response) => {
@@ -132,7 +132,7 @@ module.exports = function (app) {
   app.route('/api/replies/:board')
     .post(async (req, res) => {
        const threadId = req.body.thread_id; 
-       const boardName = req.body.board; 
+       const boardName = req.body.board || req.params.board; 
        const text = req.body.text;
        const password = req.body.delete_password;
        
@@ -164,7 +164,6 @@ module.exports = function (app) {
     .get((req, res) => {
       const boardName = req.params.board;
       const threadId = req.query.thread_id;
-      console.log(boardName + ' ' + threadId);
       threadModel.findOne({_id: threadId, board: boardName}, (error, response) => {
         if (error) { console.log(error.message); }
         res.json(response)
@@ -172,7 +171,7 @@ module.exports = function (app) {
     })
   
     .put(async (req, res) => {
-      const boardName = req.body.board; 
+      const boardName = req.body.board || req.params.board; 
       const threadId = req.body.thread_id; 
       const replyId = req.body.reply_id;
     
@@ -192,12 +191,11 @@ module.exports = function (app) {
     })
   
     .delete(async (req, res) => {
-      const boardName = req.body.board; 
+      const boardName = req.body.board || req.params.board; 
       const threadId = req.body.thread_id; 
       const replyId = req.body.reply_id;
       const deletePassword = req.body.delete_password;
     
-      console.log(deletePassword)
       const threadToUpdate = await threadModel.findOne({_id: threadId, board: boardName}, (error, response) => {
            if (error) { console.log(error.message) }
            return response
