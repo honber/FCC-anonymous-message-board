@@ -4,10 +4,10 @@ class newThreadHandler {
   constructor(board, text, deletePassword) {
     this.board = board;
     this.text = text;
-    this.createdon_ = new Date().toISOString();
-    this.bumpedon_ = new Date().toISOString();
+    this.createdOn = new Date().toISOString();
+    this.bumpedOn = new Date().toISOString();
     this.reported = false;
-    this.deletepassword_ = deletePassword;
+    this.deletePassword = deletePassword;
     this.replies = [];
   }
 };
