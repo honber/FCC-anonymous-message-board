@@ -4,15 +4,22 @@ const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
 
+const replySchema = new Schema({
+    text: String,
+    created_on: String,
+    delete_password: String,
+    reported: Boolean
+});
+
 const threadSchema= new Schema({
     board: String,
     text: String,
-    createdon_: String,
-    bumpedon_: String,
+    created_on: String,
+    bumped_on: String,
     reported: Boolean,
-    deletepassword_: String,
-    replies: Array
-})
+    delete_password: String,
+    replies: [replySchema]
+});
 
 const threadModel = mongoose.model('threads', threadSchema);
 
