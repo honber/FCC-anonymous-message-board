@@ -6,19 +6,41 @@
 *       (if additional are added, keep them at the very end!)
 */
 
-var chaiHttp = require('chai-http');
-var chai = require('chai');
-var assert = chai.assert;
-var server = require('../server');
+'use strict'
+
+const chaiHttp = require('chai-http');
+const chai = require('chai');
+const assert = chai.assert;
+const server = require('../server');
+const newThreadHandler = require('../controllers/newThreadHandler.js')
+
+const newThread = new newThreadHandler('testBoard', 'My thread text', 'myPassword');
 
 chai.use(chaiHttp);
 
-suite('Functional Tests', function() {
+suite('Functional Tests', () => {
 
-  suite('API ROUTING FOR /api/threads/:board', function() {
+  suite('API ROUTING FOR /api/threads/:board', () => {
     
-    suite('POST', function() {
+    suite('POST', () => {
       
+      test('Submit a new thread; board\'s name sent in req.params.board', done => {
+        chai.request(server)
+          .post('/api/threads/:testBoard')
+          .send({
+            board: newThread.board,
+            text: newThread.text,
+            created_on: newThread.createdOn,
+            bumped_on: newThread.bumpedOn,
+            reported: newThread.reported,
+            delete_password: newThread.deletePassword,
+            replies: newThread.replies
+          })
+          .end((err, res) => { 
+            assert.equal(res.status, 200);  
+            done();
+        })
+      })
     });
     
     suite('GET', function() {

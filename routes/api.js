@@ -13,6 +13,7 @@ const expect           = require('chai').expect;
 const newThreadHandler = require('../controllers/newThreadHandler.js');
 const replyHandler     = require('../controllers/replyHandler.js')
 const threadModel      = require('../models/threads.js');
+const display10RecentTreadsEachWith3RecentReplies = require('./functions.js')
 
 
 const CONNECTION_STRING = process.env.MLAB_URI;
@@ -33,32 +34,8 @@ mongoose.connect(CONNECTION_STRING, connectOptions, err => {
 });
 
 
-function display10RecentTreadsEachWith3RecentReplies(threadsList) {
-  const threads = threadsList.slice();
-  threads
-  .sort((a, b) => {
-    if(a. bumped_on > b. bumped_on) { return -1 }
-    else {return 1}
-  })
-  .splice(10);
-  
-  threads
-  .forEach((el, ind, arr) => {
-    arr[ind].replies = el.replies
-    .sort((a, b) => {
-      if(a.created_on > b.created_on) { return -1 }
-      else {return 1}
-    })
-    .splice(0, 3);
-  });
-  
-  return threads
-}
-
-
-
 module.exports = function (app) {
-    
+      
   app.route('/api/threads/:board')
     .post((req, res) => {
       const board          = req.params.board;
