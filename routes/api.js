@@ -100,7 +100,7 @@ module.exports = function (app) {
            res.send('Error: could not delete a thread.');
          }
          else {
-           response.deletedCount !== 0 ? res.send('success') : res.send('Could not delete a thread: incorrect board name, thread id, or delete password');
+           response.deletedCount !== 0 ? res.send('success') : res.send('Could not delete a thread: incorrect board name, thread_id, or delete password.');
          }
        }) 
   });
@@ -123,11 +123,12 @@ module.exports = function (app) {
        const bumpedOn = reply.createdOn;
        
        const threadToUpdate = await threadModel.findOne({_id: threadId, board: boardName}, (error, response) => {
-           if (error) { console.log(error.message) }
-           return response
-         });
-        
-       if (!threadToUpdate) { res.send(null) } 
+           if (error) { console.log(error.message); }
+           return response;
+         })
+         .catch((error) => {console.log(error.reason); })
+          
+       if (!threadToUpdate) { return res.send('Could not post a reply: incorrect board name or thread_id.') } 
        else { 
          threadToUpdate.bumped_on = bumpedOn;
          threadToUpdate.replies.push(newRepliesArrayElement);
@@ -155,7 +156,10 @@ module.exports = function (app) {
       const threadToUpdate = await threadModel.findOne({_id: threadId, board: boardName}, (error, response) => {
            if (error) { console.log(error.message) }
            return response
-         });
+         })
+         .catch(error => console.log(error.reason))
+      
+      if (!threadToUpdate) { return res.send('Could not report a reply: incorrect board name, thread_id or reply_id.') } 
       
       const replyToUpdate = threadToUpdate.replies.id(replyId);
       const indexOfReplyToUpdateInRepliesArray = threadToUpdate.replies.indexOf(replyToUpdate);
@@ -172,12 +176,15 @@ module.exports = function (app) {
       const threadId = req.body.thread_id; 
       const replyId = req.body.reply_id;
       const deletePassword = req.body.delete_password;
-    
+          
       const threadToUpdate = await threadModel.findOne({_id: threadId, board: boardName}, (error, response) => {
            if (error) { console.log(error.message) }
            return response
-         });
+         })
+         .catch(error => console.log(error.reason))
     
+      if (!threadToUpdate) { return res.send('Could not report a reply: incorrect board name, thread_id, reply_id or delete password.') } 
+      
       const replyToUpdate = threadToUpdate.replies.id(replyId);
       const indexOfReplyToUpdateInRepliesArray = threadToUpdate.replies.indexOf(replyToUpdate);
     
@@ -189,7 +196,7 @@ module.exports = function (app) {
         });
       }
       else {
-        res.send('incorrect password');
+        res.send('incorrect password'); 
       }
     });
     
