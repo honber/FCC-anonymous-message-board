@@ -22,6 +22,7 @@ const newThread = new newThreadHandler('testBoard', 'My thread text', 'myPasswor
 chai.use(chaiHttp);
 
 let boardName, threadId, deletePassword;
+let replyId;
 
 suite('Functional Tests', () => {
 
@@ -52,6 +53,7 @@ suite('Functional Tests', () => {
     });
     
     suite('GET', () => {
+      
       test('Get list of latest 10 threads', done => {
         chai.request(server)
           .get('/api/threads/testBoard')
@@ -95,14 +97,15 @@ suite('Functional Tests', () => {
            })
            .end((err, res) => {
              assert.equal(res.status, 200); 
-             assert.equal(res.text, 'Could not delete a thread: incorrect board name, thread id, or delete password');
+             assert.equal(res.text, 'Could not delete a thread: incorrect board name, thread_id, or delete password.');
              done();
            });
        });
     });
     
     suite('PUT', () => {
-      test('Report a thread', done => {
+      
+      test('Report a thread with given id', done => {
         chai.request(server)
           .put('/api/threads/testBoard')
           .send({
@@ -125,7 +128,8 @@ suite('Functional Tests', () => {
   suite('API ROUTING FOR /api/replies/:board', () => {
     
     suite('POST', () => {
-      test('Submit a new reply within the given thread', done => {
+      
+      test('Submit a new reply within the given thread, board\'s name sent in req.body', done => {
         chai.request(server)
           .post('/api/replies/testBoard')
           .send({
@@ -142,18 +146,118 @@ suite('Functional Tests', () => {
             done();
           });
       });
+      
+      test('Submit a new reply within the given thread, board\'s name sent in req.params', done => {
+        chai.request(server)
+          .post('/api/replies/testBoard')
+          .send({
+            thread_id: threadId, 
+            text: reply.text,
+            delete_password: reply.deletePassword
+          })
+          .end((err, res) => {
+            const index = res.redirects[0].lastIndexOf('/');
+            const currentThread = res.redirects[0].substring(index+1);
+            assert.equal(res.status, 200);  
+            assert.equal(currentThread, threadId);
+            done();
+          });
+      });
+      
     });
     
-    suite('GET', function() {
+    suite('GET', () => {
+      
+      test('Get full list of replies for thread with given id', done => {
+        chai.request(server)
+          .get(`/api/replies/testBoard?thread_id=${threadId}`)
+          .end((err, res) => {
+            replyId = res.body.replies[0]._id;
+            assert.equal(res.status, 200);  
+            assert.property(res.body.replies[0], 'text');
+            assert.property(res.body.replies[0], 'created_on');
+            assert.property(res.body.replies[0], 'reported');
+            assert.property(res.body.replies[0], 'delete_password'); 
+            done(); 
+        });
+      });
       
     });
     
     suite('PUT', function() {
       
+      test('Report a reply with given id, board name sent in req.body', done => {
+        chai.request(server)
+          .put('/api/replies/testBoard')
+          .send({
+            board: boardName,
+            thread_id: threadId,
+            reply_id: replyId
+          })
+          .end((err, res) => {
+            assert.equal(res.status, 200);  
+            assert.equal(res.text, 'reported');
+            done();
+        });
+      });
+      
+      test('Report a reply with given id, board name sent in req.params', done => {
+        chai.request(server)
+          .put('/api/replies/testBoard')
+          .send({
+            thread_id: threadId,
+            reply_id: replyId
+          })
+          .end((err, res) => {
+            assert.equal(res.status, 200);  
+            assert.equal(res.text, 'reported');
+            done();
+        });
+      });
+      
     });
     
-    suite('DELETE', function() {
+    suite('DELETE', () => {
       
+      test('Delete reply with given id', done => {
+        chai.request(server)
+          .delete('/api/replies/testBoard')
+          .send({
+            board: boardName,
+            thread_id: threadId,
+            reply_id: replyId,
+            delete_password: 'myReplyPassword'
+          })
+          .end((err, res) => {
+            assert.equal(res.status, 200); 
+            assert.equal(res.text, 'success'); 
+            done();
+        });
+      });
+      
+    });
+    
+  });
+  
+  suite('API ROUTING FOR /api/threads/:board', () => {
+    
+    suite('DELETE', () => {
+      
+      test('Delete thread created for all functional tests', done => {
+        chai.request(server)
+          .delete('/api/threads/testBoard')
+           .send({
+             board: boardName, 
+             thread_id: threadId, 
+             delete_password: deletePassword
+           })
+           .end((err, res) => {
+             assert.equal(res.status, 200); 
+             assert.equal(res.text, 'success');  
+             done();
+           });
+      });
+  
     });
     
   });
